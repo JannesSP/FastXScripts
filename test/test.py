@@ -4,7 +4,7 @@
 # website: https://jannessp.github.io
 
 from src.filter_fastx import filterFX
-from src.slice_fastx import sliceFastx
+from src.slice_fastx import sliceFastx, getSlice
 import os
 
 testFastq = os.path.join(os.path.dirname(__file__), 'test.fastq')
@@ -38,5 +38,11 @@ def test_slice_fastq_id():
 # overwrites output file from test_clise_fasta_id()
 def test_slice_fasta():
     records = sliceFastx(open(testFasta, 'r'), open(os.path.join(os.path.dirname(__file__), 'outfiles', 'fasta_out_sliced.fa'), 'w'), (8,15), 'fasta')
-    for record in records:
-        assert record.seq == 'AGGUAUC'
+    seqs = [str(record.seq) for record in records]
+    assert seqs == ['AGGUAUC', 'UGAUUUA', 'GUGCCCC', 'ACGUCAC', 'CCCACCC']
+
+def test_getSlice_position_r():
+    assert (4, 15) == getSlice(position = 10, r = 5, lowerbound = None, upperbound = None)
+
+def test_getSlice_lower_upper():
+    assert (4, 15) == getSlice(position = None, r = None, lowerbound = 5, upperbound = 15)

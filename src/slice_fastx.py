@@ -56,9 +56,9 @@ def getSlice(position : int, r : int, lowerbound : int, upperbound : int) -> tup
             slice[1] = position
     else:
         if lowerbound is not None:
-            slice[0] = lowerbound
+            slice[0] = lowerbound - 1
         if upperbound is not None:
-            slice[1] = upperbound + 1
+            slice[1] = upperbound
 
     assert slice[0] >= 0, f'Lowerbound of slice {slice} is below zero! {slice[0]}'
 
