@@ -90,8 +90,8 @@ def sliceFastx(inFastx : TextIOWrapper, outFastx : TextIOWrapper, slice : tuple,
             slicedRecords.append(record)
 
         elif not id:
-            sliceRecord(record, slice)
-            slicedRecords.append(record, format)
+            sliceRecord(record, slice, format)
+            slicedRecords.append(record)
 
     SeqIO.write(slicedRecords, outFastx, format)
     return slicedRecords
