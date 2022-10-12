@@ -1,4 +1,6 @@
-# Filter FASTA/FASTQ files for a list of read IDs
+# FastXScripts
+
+Scripts that I needed to change Fasta/FastQ files during my PhD
 
 ## Usage
 
