@@ -6,6 +6,8 @@ Scripts that I needed to change Fasta/FastQ files during my PhD
 
 ### filter_fastx.py
 
+Filter Fasta/FastQ file for IDs
+
 ```{r}
 python src/filter_fastx.py --help
 usage: filter_fastx.py [-h] [-o FASTX] FASTX IDS
@@ -21,6 +23,9 @@ optional arguments:
 ```
 
 ### slice_fastx.py
+
+Slice subsequences by their position from reads in Fasta/FastQ.
+
 ```
 usage: slice_fastx.py [-h] [--append] [--lowerbound LOWERBOUND] [--upperbound UPPERBOUND] [--position POSITION] [--range RANGE] [--id ID] inFastx outFastx
 
