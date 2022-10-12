@@ -27,10 +27,16 @@ def test_filter_fasta():
     assert filtered == set(filteredIDs)
     assert missing == set(missingIDs)
 
-def test_slice_fasta():
+def test_slice_fasta_id():
     records = sliceFastx(open(testFasta, 'r'), open(os.path.join(os.path.dirname(__file__), 'outfiles', 'fasta_out_sliced.fa'), 'w'), (8,15), 'fasta', '4052e08f-635c-419f-acd0-383c7ba40daa')
     assert records[0].seq == 'AGGUAUC'
 
-def test_slice_fastq():
+def test_slice_fastq_id():
     records = sliceFastx(open(testFastq, 'r'), open(os.path.join(os.path.dirname(__file__), 'outfiles', 'fastq_out_sliced.fq'), 'w'), (8,15), 'fastq', '4052e08f-635c-419f-acd0-383c7ba40daa')
     assert records[0].seq == 'AGGUAUC'
+
+# overwrites output file from test_clise_fasta_id()
+def test_slice_fasta():
+    records = sliceFastx(open(testFasta, 'r'), open(os.path.join(os.path.dirname(__file__), 'outfiles', 'fasta_out_sliced.fa'), 'w'), (8,15), 'fasta')
+    for record in records:
+        assert record.seq == 'AGGUAUC'
