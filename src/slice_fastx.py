@@ -8,6 +8,13 @@ from io import TextIOWrapper
 import os
 from Bio import SeqIO
 
+FORMATS = {
+    '.fa' : 'fasta',
+    '.fasta' : 'fasta',
+    '.fq' : 'fastq',
+    '.fastq' : 'fastq',
+    }
+
 def parse() -> Namespace:
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter
@@ -116,9 +123,11 @@ def main() -> None:
 
     assert append or os.path.exists(args.outFastx), f'{args.outFastx} already exists! Use a different name or --append'
 
+    format = FORMATS[os.path.splitext(args.inFastx)[1].lower()]
+
     with open(args.inFastx, 'r') as inFastx:
         with open(args.outFastx, 'a' if append else 'w') as outFastx:
-            sliceFastx(inFastx, outFastx, slice, id)
+            sliceFastx(inFastx, outFastx, slice, format, id)
 
 if __name__ == '__main__':
     main()
