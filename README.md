@@ -44,3 +44,19 @@ options:
   --range RANGE         Range which to slice up- and downstream from the position (default: None)
   --id ID               Fastx ID filter to slice from specific sequence (only works for one ID) (default: None)
 ```
+
+### complement.py
+
+Translate nucleotide sequences from terminal or fasta files.
+
+```
+usage: complement.py [-h] [--reverse] sequences
+
+positional arguments:
+  sequences   Input sequence separated with "," or fasta file
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --reverse   Use to print 3'->5' sequence. (default: False)
+  --rna       Translate RNA sequences (default: False)
+```

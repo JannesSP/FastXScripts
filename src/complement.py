@@ -8,7 +8,7 @@ import os
 from Bio import SeqIO
 from Bio.Seq import Seq
 
-COMPLEMENT = {
+COMPLEMENT_DNA = {
     'A':'T',
     'C':'G',
     'G':'C',
@@ -22,11 +22,26 @@ COMPLEMENT = {
     'K':'M'
     }
 
-def complement(seq):
+COMPLEMENT_RNA = {
+    'A':'U',
+    'C':'G',
+    'G':'C',
+    'U':'A',
+    'N':'N',
+    'Y':'R',
+    'R':'Y',
+    'S':'S',
+    'W':'W',
+    'M':'K', 
+    'K':'M'
+}
+
+def complement(seq : str, rna : bool = False):
+    COMP = COMPLEMENT_RNA if rna else COMPLEMENT_DNA
     ret = ''
     for b in seq:
         try:
-            ret += COMPLEMENT.get(b)
+            ret += COMP[b]
         except KeyError:
             print(f'Base {b} unknown, no complement found!')
             exit(1)
@@ -39,12 +54,14 @@ def parse() -> Namespace:
     )
     parser.add_argument('sequences', help='Input sequence separated with "," or fasta file')
     parser.add_argument('--reverse', action='store_true', help='Use to print 3\'->5\' sequence.')
+    parser.add_argument('--rna', action='store_true', help='Translate RNA sequences')
     return parser.parse_args()
 
 def main() -> None:
     args = parse()
     inp : str = args.sequences
     rev : bool = args.reverse
+    rna : bool = args.rna
 
     if inp.endswith('.fa') or inp.endswith('.fasta'):
         assert os.path.exists(inp) and os.path.isfile(inp)
@@ -52,7 +69,7 @@ def main() -> None:
         records = []
 
         for rec in SeqIO.parse(inp, 'fasta'):
-            c = complement(rec.seq)
+            c = complement(rec.seq, rna)
             rec.seq = Seq(c[::-1]) if rev else Seq(c)
             rec.id += '_reverse-complement' if rev else '_complement'
             records.append(rec)
@@ -67,7 +84,7 @@ def main() -> None:
             print(f"5'{' ' * (len(seq)-3)}3'")
             print(seq + '\n')
 
-            c = complement(seq)
+            c = complement(seq, rna)
             if rev:
                 print(f"5'{' ' * (len(c)-3)}3'")
                 c = c[::-1]
