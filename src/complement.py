@@ -36,7 +36,7 @@ COMPLEMENT_RNA = {
     'K':'M'
 }
 
-def complement(seq : str, rna : bool = False):
+def complement(seq : str, rna : bool = False) -> str:
     COMP = COMPLEMENT_RNA if rna else COMPLEMENT_DNA
     ret = ''
     for b in seq:
