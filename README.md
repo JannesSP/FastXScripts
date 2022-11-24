@@ -60,3 +60,18 @@ optional arguments:
   --reverse   Use to print 3'->5' sequence. (default: False)
   --rna       Translate RNA sequences (default: False)
 ```
+
+### wtf.py
+
+What the fasta will analyse given sequences for their content like number of bases, the AT and GC content, the number of ambiguous bases (e.g. N).
+
+```
+What the fasta will analyse your reference fasta sequence
+
+positional arguments:
+  FASTA_or_SEQ  FASTA reference file or sequence
+
+options:
+  -h, --help    show this help message and exit
+  --rna         switch to RNA if reference FASTA contains RNA (default: False)
+```
