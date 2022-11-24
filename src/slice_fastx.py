@@ -121,7 +121,7 @@ def main() -> None:
     id = args.id
     append = args.append
 
-    assert append or os.path.exists(args.outFastx), f'{args.outFastx} already exists! Use a different name or --append'
+    assert append or not os.path.exists(args.outFastx), f'{args.outFastx} already exists! Use a different name or --append'
 
     format = FORMATS[os.path.splitext(args.inFastx)[1].lower()]
 
