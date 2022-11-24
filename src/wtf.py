@@ -66,7 +66,7 @@ def get_seq_content(counts : dict) -> dict:
     ----------
     counts : dict
         Counts of all nucleotide IUPAC characters
-    
+
     Returns
     -------
     content : dict
@@ -82,27 +82,30 @@ def get_seq_content(counts : dict) -> dict:
     gc = 0
 
     for character in counts:
-    
+
         if character in ACCURATE:
             acc += counts[character]
         else:
             amb += counts[character]
 
         if character in 'ATW':
-            at += 1
+            at += counts[character]
         elif character in 'GCS':
-            gc += 1
+            gc += counts[character]
 
     return {'total':amb+acc, 'accurate':acc, 'ambiguous':amb, 'AT':at, 'GC':gc}
 
 def output(content : dict, id : str = None) -> None:
     if id is not None:
         print(id)
-    print(content)
+
+    for key, item in content.items():
+        print(f'{key}: {item}, ', end='')
+    print(f'AT%: {(content["AT"]/content["total"]):.3}, GC%: {(content["GC"]/content["total"]):.3}, ambiguous%: {(content["ambiguous"]/content["total"]):.3}')
 
 def main() -> None:
     args = parse()
-    fasta = args.fasta
+    fasta = args.FASTA_or_SEQ
     rna = args.rna
 
     global IUPAC
@@ -115,7 +118,7 @@ def main() -> None:
     if fasta.endswith('.fa') or fasta.endswith('.fasta'):
         assert os.path.exists(fasta) and os.path.isfile(fasta)
 
-        for record in SeqIO.parse(fasta, format):
+        for record in SeqIO.parse(fasta, 'fasta'):
             output(get_seq_content(count_bases(str(record.seq))), record.id)
 
     # provided sequence
