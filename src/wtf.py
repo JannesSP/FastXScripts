@@ -81,6 +81,8 @@ def get_seq_content(counts : dict) -> dict:
     at = 0
     gc = 0
 
+    print(counts)
+
     for character in counts:
 
         if character in ACCURATE:
