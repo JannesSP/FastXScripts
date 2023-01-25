@@ -59,7 +59,7 @@ def filterLength(inFX : str, outFX : str, threshold : int, mode : str) -> None:
     out = []
     for i, seq_record in enumerate(infx):
         if (i+1)%100==0:
-            print('Checking read', i+1)
+            print('Checking read', i+1, '\r')
         if func(len(seq_record), threshold):
             out.append(seq_record)
     SeqIO.write(out, outFX, format)
