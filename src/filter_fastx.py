@@ -56,12 +56,13 @@ def filterLength(inFX : str, outFX : str, threshold : int, mode : str) -> None:
         exit(1)
 
     infx = SeqIO.parse(inFX, format)
-    outfx = []
-    seq_record : SeqIO.SeqRecord
-    for seq_record in infx:
+    out = []
+    for i, seq_record in enumerate(infx):
+        if (i+1)%100==0:
+            print('Checking read', i+1)
         if func(len(seq_record), threshold):
-            outfx.append(seq_record)
-    SeqIO.write(outfx, outFX, format)
+            out.append(seq_record)
+    SeqIO.write(out, outFX, format)
 
 def filterIDs(inFX : TextIOWrapper, ids : TextIOWrapper, outFX : TextIOWrapper = None) -> tuple:
     '''
