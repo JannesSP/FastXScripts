@@ -5,14 +5,19 @@
 
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from io import TextIOWrapper
+from Bio import SeqIO
 
 def parse() -> Namespace:
     parser = ArgumentParser(
-        formatter_class=ArgumentDefaultsHelpFormatter
+        formatter_class=ArgumentDefaultsHelpFormatter,
+        description='Filter FASTA or FASTQ file for ids or length of reads'
     )
 
     parser.add_argument('inFASTX', metavar='FASTX', type=str, help='Multi FASTQ or FASTA file')
-    parser.add_argument('read_ids', metavar='IDS', type=str, help='One read ID per line in file, line separated read IDs')
+    mode = parser.add_mutually_exclusive_group(required = True)
+    mode.add_argument('-i', '--read_ids', metavar='IDS', type=str, default=None, help='One read ID per line in file, line separated read IDs')
+    mode.add_argument('-l', '--long', metavar='LENGTH', type=int, default=None, help='Filter FASTA or FASTQ file for reads given length or longer')
+    mode.add_argument('-s', '--short', metavar='LENGTH', type=int, default=None, help='Filter FASTA or FASTQ file for reads given length or shorter')
     parser.add_argument('-o', '--outFASTX', metavar='FASTX', type=str, default = None, help='FASTQ or FASTA file containing provided reads')
 
     return parser.parse_args()
@@ -23,10 +28,42 @@ def main() -> None:
     inFX = args.inFASTX
     ids = args.read_ids
     outFX = args.outFASTX
+    long = args.long
+    short = args.short
 
-    filterFX(open(inFX, 'r'), open(ids, 'r'), open(outFX, 'w+'))
+    if ids is not None:
+        filterIDs(open(inFX, 'r'), open(ids, 'r'), open(outFX, 'w+'))
 
-def filterFX(inFX : TextIOWrapper, ids : TextIOWrapper, outFX : TextIOWrapper = None) -> tuple:
+    elif long is not None:
+        filterLength(inFX, outFX, long, 'long')
+
+    elif short is not None:
+        filterLength(inFX, outFX, short, 'short')
+
+def filterLength(inFX : str, outFX : str, threshold : int, mode : str) -> None:
+    func = {
+        'long':lambda length, threshold: True if length >= threshold else False,
+        'short':lambda length, threshold: True if length <= threshold else False
+        }[mode]
+    
+    if inFX.lower().endswith('.fa') or inFX.lower().endswith('.fasta'):
+        format = 'fasta'
+    elif inFX.lower().endswith('.fq') or inFX.lower().endswith('.fastq'):
+        format = 'fastq'
+    else:
+        print('Unknown file format for', inFX)
+        print('Must be .fa/.fasta or .fq/.fastq')
+        exit(1)
+
+    infx = SeqIO.parse(inFX, format)
+    outfx = []
+    seq_record : SeqIO.SeqRecord
+    for seq_record in infx:
+        if func(len(seq_record), threshold):
+            outfx.append(seq_record)
+    SeqIO.write(outfx, outFX, format)
+
+def filterIDs(inFX : TextIOWrapper, ids : TextIOWrapper, outFX : TextIOWrapper = None) -> tuple:
     '''
     Filters the input FASTA/FASTQ for ids in given list and writes filtered FASTA/FASTQ.
     
