@@ -6,18 +6,24 @@ Scripts that I needed to change Fasta/FastQ files during my PhD
 
 ### filter_fastx.py
 
-Filter Fasta/FastQ file for IDs
+Filter Fasta/FastQ file for IDs or length of read
 
 ```{r}
-python src/filter_fastx.py --help
-usage: filter_fastx.py [-h] [-o FASTX] FASTX IDS
+usage: filter_fastx.py [-h] (-i IDS | -l LENGTH | -s LENGTH) [-o FASTX] FASTX
+
+Filter FASTA or FASTQ file for ids or length of reads
 
 positional arguments:
   FASTX                 Multi FASTQ or FASTA file
-  IDS                   One read ID per line in file, line separated read IDs
 
 optional arguments:
   -h, --help            show this help message and exit
+  -i IDS, --read_ids IDS
+                        One read ID per line in file, line separated read IDs (default: None)
+  -l LENGTH, --long LENGTH
+                        Filter FASTA or FASTQ file for reads given length or longer (default: None)
+  -s LENGTH, --short LENGTH
+                        Filter FASTA or FASTQ file for reads given length or shorter (default: None)
   -o FASTX, --outFASTX FASTX
                         FASTQ or FASTA file containing provided reads (default: None)
 ```
@@ -59,4 +65,19 @@ optional arguments:
   -h, --help  show this help message and exit
   --reverse   Use to print 3'->5' sequence. (default: False)
   --rna       Translate RNA sequences (default: False)
+```
+
+### wtf.py
+
+What the fasta will analyse given sequences for their content like number of bases, the AT and GC content, the number of ambiguous bases (e.g. N).
+
+```
+What the fasta will analyse your reference fasta sequence
+
+positional arguments:
+  FASTA_or_SEQ  FASTA reference file or sequence
+
+options:
+  -h, --help    show this help message and exit
+  --rna         switch to RNA if reference FASTA contains RNA (default: False)
 ```
