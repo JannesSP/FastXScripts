@@ -14,7 +14,7 @@ def parse() -> Namespace:
         description='Filter FASTA or FASTQ file for ids or length of reads'
     )
 
-    parser.add_argument('inFASTX', metavar='FASTX', type=str, help='Multi FASTQ or FASTA file', required=True)
+    parser.add_argument('inFASTX', metavar='FASTX', type=str, help='Multi FASTQ or FASTA file')
     mode = parser.add_mutually_exclusive_group(required = True)
     mode.add_argument('-i', '--read_ids', metavar='IDS', type=str, default=None, help='One read ID per line in file, line separated read IDs')
     mode.add_argument('-l', '--long', metavar='LENGTH', type=int, default=None, help='Filter FASTA or FASTQ file for reads given length or longer')
