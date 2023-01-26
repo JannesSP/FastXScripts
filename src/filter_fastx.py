@@ -6,6 +6,7 @@
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from io import TextIOWrapper
 from Bio import SeqIO
+import numpy as np
 
 def parse() -> Namespace:
     parser = ArgumentParser(
@@ -57,12 +58,18 @@ def filterLength(inFX : str, outFX : str, threshold : int, mode : str) -> None:
 
     infx = SeqIO.parse(inFX, format)
     out = []
+    longest = -np.inf
+    shortest = np.inf
     for i, seq_record in enumerate(infx):
         if (i+1)%1000==0:
             print('Checking read', i+1, '\tFound', len(out), end='\r')
         if func(len(seq_record), threshold):
             out.append(seq_record)
+        longest = max(longest, len(seq_record))
+        shortest = min(shortest, len(seq_record))
     SeqIO.write(out, outFX, format)
+    print()
+    print('longest', longest, 'shortest', shortest)
 
 def filterIDs(inFX : TextIOWrapper, ids : TextIOWrapper, outFX : TextIOWrapper = None) -> tuple:
     '''
