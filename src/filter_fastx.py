@@ -66,7 +66,7 @@ def main() -> None:
     SeqIO.write(records, outFX, format)
     print('longest', longest, 'shortest', shortest)
 
-def filterLength(inFX : str, threshold : int, mode : str) -> None:
+def filterLength(inFX : str, threshold : int, mode : str) -> tuple:
     func = {
         'long':lambda length, threshold: True if length >= threshold else False,
         'short':lambda length, threshold: True if length <= threshold else False
