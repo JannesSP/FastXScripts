@@ -37,6 +37,8 @@ def main() -> None:
     dna=args.dna
     rna=args.rna
 
+    print('Filtering', inFX)
+
     if outFX.lower().endswith('.fa') or outFX.lower().endswith('.fasta'):
         format = 'fasta'
     elif outFX.lower().endswith('.fq') or outFX.lower().endswith('.fastq'):
