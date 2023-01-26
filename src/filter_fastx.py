@@ -14,16 +14,15 @@ def parse() -> Namespace:
         description='Filter FASTA or FASTQ file for ids or length of reads'
     )
 
-    parser.add_argument('inFASTX', metavar='FASTX', type=str, help='Multi FASTQ or FASTA file')
+    parser.add_argument('inFASTX', metavar='FASTX', type=str, help='Multi FASTQ or FASTA file', required=True)
     mode = parser.add_mutually_exclusive_group(required = True)
     mode.add_argument('-i', '--read_ids', metavar='IDS', type=str, default=None, help='One read ID per line in file, line separated read IDs')
     mode.add_argument('-l', '--long', metavar='LENGTH', type=int, default=None, help='Filter FASTA or FASTQ file for reads given length or longer')
     mode.add_argument('-s', '--short', metavar='LENGTH', type=int, default=None, help='Filter FASTA or FASTQ file for reads given length or shorter')
-    parser.add_argument('-o', '--outFASTX', metavar='FASTX', type=str, default = None, help='FASTQ or FASTA file containing provided reads')
+    parser.add_argument('-o', '--outFASTX', metavar='FASTX', type=str, default = None, help='FASTQ or FASTA file containing provided reads', required=True)
     nt_mode = parser.add_mutually_exclusive_group()
-    nt_mode.add_argument('--dna', action='store_true', default=False)
-    nt_mode.add_argument('--rna', action='store_true', default=False)
-    parser.add_argument('--outformat', default=None, choices=['fasta', 'fastq'])
+    nt_mode.add_argument('--dna', action='store_true', default=False, help='Convert output sequences to dna (ACGT)')
+    nt_mode.add_argument('--rna', action='store_true', default=False, help='Convert output sequences to rna (ACGU)')
 
     return parser.parse_args()
 
@@ -37,7 +36,15 @@ def main() -> None:
     short = args.short
     dna=args.dna
     rna=args.rna
-    outformat = args.outformat
+
+    if outFX.lower().endswith('.fa') or outFX.lower().endswith('.fasta'):
+        format = 'fasta'
+    elif outFX.lower().endswith('.fq') or outFX.lower().endswith('.fastq'):
+        format = 'fastq'
+    else:
+        print('Unknown file format for', outFX)
+        print('Must be .fa/.fasta or .fq/.fastq')
+        exit(1)
 
     if ids is not None:
         filterIDs(open(inFX, 'r'), open(ids, 'r'), open(outFX, 'w+'))
@@ -54,7 +61,7 @@ def main() -> None:
         if rna:
             record.seq = record.seq.replace('T', 'U')
 
-    SeqIO.write(records, outFX, outformat)
+    SeqIO.write(records, outFX, format)
     print('longest', longest, 'shortest', shortest)
 
 def filterLength(inFX : str, threshold : int, mode : str) -> None:
