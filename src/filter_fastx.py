@@ -20,6 +20,10 @@ def parse() -> Namespace:
     mode.add_argument('-l', '--long', metavar='LENGTH', type=int, default=None, help='Filter FASTA or FASTQ file for reads given length or longer')
     mode.add_argument('-s', '--short', metavar='LENGTH', type=int, default=None, help='Filter FASTA or FASTQ file for reads given length or shorter')
     parser.add_argument('-o', '--outFASTX', metavar='FASTX', type=str, default = None, help='FASTQ or FASTA file containing provided reads')
+    nt_mode = parser.add_mutually_exclusive_group()
+    nt_mode.add_argument('--dna', action='store_true', default=False)
+    nt_mode.add_argument('--rna', action='store_true', default=False)
+    parser.add_argument('--outformat', default=None, choices=['fasta', 'fastq'])
 
     return parser.parse_args()
 
@@ -31,17 +35,29 @@ def main() -> None:
     outFX = args.outFASTX
     long = args.long
     short = args.short
+    dna=args.dna
+    rna=args.rna
+    outformat = args.outformat
 
     if ids is not None:
         filterIDs(open(inFX, 'r'), open(ids, 'r'), open(outFX, 'w+'))
 
     elif long is not None:
-        filterLength(inFX, outFX, long, 'long')
+        records, longest, shortest = filterLength(inFX, long, 'long')
 
     elif short is not None:
-        filterLength(inFX, outFX, short, 'short')
+        records, longest, shortest = filterLength(inFX, short, 'short')
 
-def filterLength(inFX : str, outFX : str, threshold : int, mode : str) -> None:
+    for record in records:
+        if dna:
+            record.seq = record.seq.replace('U', 'T')
+        if rna:
+            record.seq = record.seq.replace('T', 'U')
+
+    SeqIO.write(records, outFX, outformat)
+    print('longest', longest, 'shortest', shortest)
+
+def filterLength(inFX : str, threshold : int, mode : str) -> None:
     func = {
         'long':lambda length, threshold: True if length >= threshold else False,
         'short':lambda length, threshold: True if length <= threshold else False
@@ -67,9 +83,8 @@ def filterLength(inFX : str, outFX : str, threshold : int, mode : str) -> None:
             out.append(seq_record)
         longest = max(longest, len(seq_record))
         shortest = min(shortest, len(seq_record))
-    SeqIO.write(out, outFX, format)
     print()
-    print('longest', longest, 'shortest', shortest)
+    return out, longest, shortest
 
 def filterIDs(inFX : TextIOWrapper, ids : TextIOWrapper, outFX : TextIOWrapper = None) -> tuple:
     '''
