@@ -28,6 +28,7 @@ def main() -> None:
     long=args.long
     short=args.short
     outfile=args.outfile
+    print(f'Analysing {bam}')
 
     assert outfile.lower().endswith('.fa') or outfile.lower().endswith('.fasta')
 
