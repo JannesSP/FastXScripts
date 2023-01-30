@@ -50,7 +50,7 @@ def filterLength(bamfile : str, outfile : str, threshold : int, mode : str) -> N
             if func(read.query_alignment_length):
                 writeFastx(out, read.query_name, read.query_sequence)
                 print(f'Found {read.query_name} with length {read.query_alignment_length}', end = '\r')
-    print('Done')
+    print('\nDone')
 
 def writeFastx(file : TextIOWrapper, name : str, read : str) -> None:
     file.write(f'>{name}\n{read}\n')
