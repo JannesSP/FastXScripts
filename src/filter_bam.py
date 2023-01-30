@@ -6,13 +6,6 @@
 
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from io import TextIOWrapper
-# import os
-# import h5py
-# import pandas as pd
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-# import scipy
 import pysam
 
 from src.filter_fastx import filterLength
@@ -22,12 +15,11 @@ def parse() -> Namespace:
         formatter_class=ArgumentDefaultsHelpFormatter,
         description='Filter bam file for read lengths and write them to a fasta file, fastq not available yet'
     )
-    parser.add_argument('--bam', type=str, help='Mapping bam file', required=True)
+    parser.add_argument('-b', '--bam', type=str, help='Mapping bam file', required=True)
     mode = parser.add_mutually_exclusive_group(required=True)
-    # mode.add_argument('-i', '--read_ids', metavar='IDS', type=str, default=None, help='One read ID per line in file, line separated read IDs')
     mode.add_argument('-l', '--long', metavar='LENGTH', type=int, default=None, help='Filter BAM file for reads given length or longer')
     mode.add_argument('-s', '--short', metavar='LENGTH', type=int, default=None, help='Filter BAM file for reads given length or shorter')
-    parser.add_argument('--outfile', type=str, help='fasta file to write reads to', required=True)
+    parser.add_argument('-o', '--outfile', type=str, help='fasta file to write reads to', required=True)
     return parser.parse_args()
 
 def main() -> None:
