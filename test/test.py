@@ -3,8 +3,9 @@
 # github: https://github.com/JannesSP
 # website: https://jannessp.github.io
 
-from src.filter_fastx import filterFX
+from src.filter_fastx import filterIDs, filterLength
 from src.slice_fastx import sliceFastx, getSlice
+from src.mergeIDs import intersect, union
 import os
 
 testFastq = os.path.join(os.path.dirname(__file__), 'test.fastq')
@@ -15,15 +16,31 @@ found = set(['4052e08f-635c-419f-acd0-383c7ba40daa', '5e99c5f5-61a9-48e8-9d3c-b7
 filtered = set(['cf9d662a-850f-49a9-ab55-86ea4e34aa23', '9ca3164f-ce83-4e41-ae86-44a1646aaec4', 'c672e8d3-0b3b-48b5-8170-1ad20e923257'])
 missing = set(['c672e8d3-0b3b-48b5-8170-1ad20e923251', 'c6eee8d3-033c-4755-86a0-1ad20e923257'])
 
-def test_filter_fastq():
-    foundIDs, filteredIDs, missingIDs = filterFX(open(testFastq, 'r'), open(ids, 'r'), open(os.path.join(os.path.dirname(__file__), 'outfiles', 'fastq_out.fq'), 'w'))
-    assert found == set(foundIDs)
+longReads = set(['cf9d662a-850f-49a9-ab55-86ea4e34aa23', '9ca3164f-ce83-4e41-ae86-44a1646aaec4', '5e99c5f5-61a9-48e8-9d3c-b74f82e338cc', 'c672e8d3-0b3b-48b5-8170-1ad20e923257'])
+shortReads = set(['4052e08f-635c-419f-acd0-383c7ba40daa'])
+
+intersectIDs = set([
+    '4052e08f-635c-419f-acd0-383c7ba40daa',
+    '5e99c5f5-61a9-48e8-9d3c-b74f82e338cc'
+    ])
+unionIDs = set([
+    '4052e08f-635c-419f-acd0-383c7ba40daa',
+    '5e99c5f5-61a9-48e8-9d3c-b74f82e338cc',
+    'c672e8d3-0b3b-48b5-8170-1ad20e923251',
+    'c6eee8d3-033c-4755-86a0-1ad20e923257',
+    'c672e8d3-abcd-48b5-1234-1ad20e923251',
+    'c6eee8d3-wxyz-4755-5678-1ad20e923257'
+    ])
+
+def test_filter_fastq_ids():
+    foundRecords, filteredIDs, missingIDs = filterIDs(testFastq, 'fastq', open(ids, 'r'))
+    assert found == set(map(lambda rec : rec.name, foundRecords))
     assert filtered == set(filteredIDs)
     assert missing == set(missingIDs)
 
-def test_filter_fasta():
-    foundIDs, filteredIDs, missingIDs = filterFX(open(testFasta, 'r'), open(ids, 'r'), open(os.path.join(os.path.dirname(__file__), 'outfiles', 'fastq_out.fa'), 'w'))
-    assert found == set(foundIDs)
+def test_filter_fasta_ids():
+    foundRecords, filteredIDs, missingIDs = filterIDs(testFasta, 'fasta', open(ids, 'r'))
+    assert found == set(map(lambda rec : rec.name, foundRecords))
     assert filtered == set(filteredIDs)
     assert missing == set(missingIDs)
 
@@ -46,3 +63,19 @@ def test_getSlice_position_r():
 
 def test_getSlice_lower_upper():
     assert (4, 15) == getSlice(position = None, r = None, lowerbound = 5, upperbound = 15)
+
+def test_filter_fastq_length_long():
+    reads, longest, shortest = filterLength(testFastq, 'fastq', 70, 'long')
+    assert longReads == set(map(lambda rec : rec.name, reads))
+
+def test_filter_fastq_length_short():
+    reads, longest, shortest = filterLength(testFastq, 'fastq', 70, 'short')
+    assert shortReads == set(map(lambda rec : rec.name, reads))
+
+def test_intersect_ids():
+    ids = intersect([os.path.join(os.path.dirname(__file__), 'ids.txt'), os.path.join(os.path.dirname(__file__), 'ids_2.txt')])
+    assert ids == intersectIDs
+
+def test_union_ids():
+    ids = union([os.path.join(os.path.dirname(__file__), 'ids.txt'), os.path.join(os.path.dirname(__file__), 'ids_2.txt')])
+    assert ids == unionIDs
