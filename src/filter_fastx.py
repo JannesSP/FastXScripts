@@ -30,11 +30,11 @@ def parse() -> Namespace:
 def main() -> None:
     args = parse()
 
-    inFX = args.inFASTX
-    ids = args.read_ids
-    outFX = args.outFASTX
-    long = args.long
-    short = args.short
+    inFX=args.inFASTX
+    ids=args.read_ids
+    outFX=args.outFASTX
+    long=args.long
+    short=args.short
     dna=args.dna
     rna=args.rna
 
@@ -60,8 +60,10 @@ def main() -> None:
         exit(2)
 
     assert not exists(outFX), 'outFASTX already exists!'
+    assert exists(inFX), 'inFASTX does not exist!'
 
     if ids is not None:
+        assert exists(ids), 'IDs file does not exist!'
         records, filtered, missed = filterIDs(inFX, informat, open(ids, 'r'))
         print('Found Reads: ', len(records), ', Filtered:, ', len(filtered), ', Unseen IDs: ', len(missed))
 
