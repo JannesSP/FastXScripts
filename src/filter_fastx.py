@@ -169,10 +169,7 @@ def filterIDs(inFX : str, format : str, ids : TextIOWrapper) -> tuple:
         else:
             removedIDs.append(seq_record.name)
 
-    print(f'Processed line {idx}\t\t')
-    print(f'Found {len(foundRecords)} ids')
-    print(f'Filtered {len(removedIDs)} ids')
-    print(f'Missed {len(ids_list)} ids')
+    print(f'Processed lines {idx}\t\t')
 
     return foundRecords, removedIDs, ids_list
 
