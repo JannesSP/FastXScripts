@@ -15,7 +15,7 @@ def parse() -> Namespace:
     )
     parser.add_argument('file', type=FileType('r'), nargs='+', help='Provide a list of ID files')
     parser.add_argument('method', choices=['intersect', 'union'], default='intersect', help='Merge method for lists of IDs')
-    parser.add_argument('-o', '--outfile', type=str, help='File to write output IDs', required=True)
+    parser.add_argument('outfile', type=str, help='File to write output IDs')
     parser.add_argument('-i', '--ignore', action='store_true', default=False)
     return parser.parse_args()
 
