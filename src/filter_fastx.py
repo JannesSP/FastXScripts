@@ -161,7 +161,7 @@ def filterIDs(inFX : str, format : str, ids : TextIOWrapper) -> tuple:
 
     for idx, seq_record in enumerate(infx):
         if (idx+1)%1000==0:
-            print(f'Processing line {idx} ...', end='\r')
+            print(f'Processing line {idx+1} ...', end='\r')
 
         if seq_record.name in ids_list:
             foundRecords.append(seq_record)
