@@ -21,6 +21,7 @@ def parse() -> Namespace:
     mode.add_argument('-i', '--read_ids', metavar='IDS', type=str, default=None, help='One read ID per line in file, line separated read IDs')
     mode.add_argument('-l', '--long', metavar='LENGTH', type=int, default=None, help='Filter FASTA or FASTQ file for reads given length or longer')
     mode.add_argument('-s', '--short', metavar='LENGTH', type=int, default=None, help='Filter FASTA or FASTQ file for reads given length or shorter')
+    mode.add_argument('-n', '--number', metavar='NUMBER', type=int, default=None, help='Filter FASTA or FASTQ file for given number of reads')
     nt_mode = parser.add_mutually_exclusive_group()
     nt_mode.add_argument('--dna', action='store_true', default=False, help='Convert output sequences to dna (ACGT)')
     nt_mode.add_argument('--rna', action='store_true', default=False, help='Convert output sequences to rna (ACGU)')
@@ -35,6 +36,7 @@ def main() -> None:
     outFX=args.outFASTX
     long=args.long
     short=args.short
+    number=args.number
     dna=args.dna
     rna=args.rna
 
@@ -67,13 +69,15 @@ def main() -> None:
         records, filtered, missed = filterIDs(inFX, informat, open(ids, 'r'))
         print('Found Reads: ', len(records), ', Filtered:, ', len(filtered), ', Unseen IDs: ', len(missed))
 
-    else:
-        if long is not None:
-            records, longest, shortest = filterLength(inFX, informat, long, 'long')
+    elif long is not None:
+        records, longest, shortest = filterLength(inFX, informat, long, 'long')
 
-        elif short is not None:
-            records, longest, shortest = filterLength(inFX, informat, short, 'short')
+    elif short is not None:
+        records, longest, shortest = filterLength(inFX, informat, short, 'short')
         print('longest', longest, 'shortest', shortest)
+    
+    elif number is not None:
+        records = filterNum(inFX, informat, number)
 
     for record in records:
         if dna:
@@ -82,6 +86,34 @@ def main() -> None:
             record.seq = record.seq.replace('T', 'U')
 
     SeqIO.write(records, outFX, outformat)
+
+def filterNum(inFX : str, format : str, number : int) -> list:
+    '''
+    Filters (uniformly) randomly drawn reads from given FASTX file.
+
+    Parameters
+    ----------
+    inFX : str
+        input FASTX containing reads
+    number : int
+        number of randomly chosen reads
+
+    Returns
+    -------
+    chosen : list
+        list with SeqRecords of randomly chosen reads
+    '''
+
+    read_dict = SeqIO.to_dict(SeqIO.parse(inFX, format))
+    readids = list(read_dict.keys())
+
+    choice = np.random.default_rng().choice(len(readids), size=number, replace=False)
+    chosen = []
+
+    for i in choice:
+        chosen.append(read_dict[readids[i]])
+
+    return chosen
 
 def filterLength(inFX : str, format : str, threshold : int, mode : str) -> tuple:
     '''
