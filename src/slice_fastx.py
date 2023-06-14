@@ -1,4 +1,4 @@
-# author: Jannes Spangenberg
+    # author: Jannes Spangenberg
 # e-mail: jannes.spangenberg@uni-jena.de
 # github: https://github.com/JannesSP
 # website: https://jannessp.github.io
@@ -24,20 +24,23 @@ def parse() -> Namespace:
     parser.add_argument('--append', action='store_true', help='Appends slices to existing outFastx')
     parser.add_argument('--lowerbound', default=None, type=int, help='Lower bound for slicing area (1-based)')
     parser.add_argument('--upperbound', default=None, type=int, help='Upper bound for slicing area (1-based)')
-    parser.add_argument('--position', default=None, type=int, help='Position which to slice (1-based)')
+    parser.add_argument('--center', default=None, type=int, help='Center position which to slice (1-based)')
     parser.add_argument('--range', default=None, type=int, help='Range which to slice up- and downstream from the position')
+    parser.add_argument('--slice_start', default=None, type=int, help='Slice number of nucleotides from start of reads')
+    parser.add_argument('--slice_end', default=None, type=int, help='Slice number of nucleotides from end of reads')
+    # TODO read input ids file
     parser.add_argument('--id', default=None, type=str, help='Fastx ID filter to slice from specific sequence (only works for one ID)')
     return parser.parse_args()
 
-def getSlice(position : int, r : int, lowerbound : int, upperbound : int) -> tuple:
+def getSliceRegion(position : int, range : int, lowerbound : int, upperbound : int) -> tuple:
     '''
-    Return slice interval for Fastx sequence
+    Return desired interval of Fastx sequence
 
     Parameters
     ----------
     position : int
         center position of slice interval
-    r : int
+    range : int
         range to include into slice interval
     lowerbound : int
         lower bound of interval that is included
@@ -55,9 +58,9 @@ def getSlice(position : int, r : int, lowerbound : int, upperbound : int) -> tup
     # slice python style 0-based [included, excluded)
     slice = [None, None]
     if position is not None:
-        if r is not None:
-            slice[0] = position - 1 - r
-            slice[1] = position + r
+        if range is not None:
+            slice[0] = position - 1 - range
+            slice[1] = position + range
         else:
             slice[0] = position - 1
             slice[1] = position
@@ -105,25 +108,59 @@ def sliceFastx(inFastx : TextIOWrapper, outFastx : TextIOWrapper, slice : tuple,
 
 def sliceRecord(record : SeqIO.SeqRecord, slice : tuple, format : str) -> None:
     assert len(record.seq) >= slice[1], f'Slice {slice} too large for sequence {record.id} with length {len(record.seq)}'
-    record.description += f' sliced=({slice[0]+1},{slice[1]})'
+    a = slice[0]
+    b = len(record.seq) if slice[1] == -1 else slice[1]
+    record.description += f' sliced=({len(record.seq) + a + 1 if a < 0 else a+1},{b})'
     if format == 'fastq':
-        phred_quality = record.letter_annotations['phred_quality'][slice[0] : slice[1]]
+        phred_quality = record.letter_annotations['phred_quality'][a : b]
         del record.letter_annotations['phred_quality']
-    record.seq = record.seq[slice[0] : slice[1]]
+    record.seq = record.seq[a : b]
     if format == 'fastq':
         record.letter_annotations['phred_quality'] = phred_quality
 
+def slice_start(num_of_bases : int) -> tuple:
+    '''
+    Slice sequences and write new Fastx
+    
+    Parameters
+    ----------
+    num_of_bases : int
+    
+    Returns
+    -------
+    slice : tuple
+        interval (0, num_of_bases) 0-based for slice interval [0, num_of_bases)
+    '''
+    return (0, num_of_bases)
+
+def slice_end(num_of_bases : int) -> tuple:
+    '''
+    Slice sequences and write new Fastx
+    
+    Parameters
+    ----------
+    num_of_bases : int
+    
+    Returns
+    -------
+    slice : tuple
+        interval (num_of_bases, -1) 0-based for slice interval [len(read) - num_of_bases, len(read))
+    '''
+    return (-num_of_bases, -1)
 
 def main() -> None:
     args = parse()
-
-    slice = getSlice(args.position, args.range, args.lowerbound, args.upperbound)
+    format = FORMATS[os.path.splitext(args.inFastx)[1].lower()]
     id = args.id
     append = args.append
-
     assert append or not os.path.exists(args.outFastx), f'{args.outFastx} already exists! Use a different name or --append'
 
-    format = FORMATS[os.path.splitext(args.inFastx)[1].lower()]
+    if args.slice_start is not None:
+        slice = slice_start(args.slice_start)
+    elif args.slice_end is not None:
+        slice = slice_end(args.slice_end)
+    else:
+        slice = getSliceRegion(args.position, args.range, args.lowerbound, args.upperbound)
 
     with open(args.inFastx, 'r') as inFastx:
         with open(args.outFastx, 'a' if append else 'w') as outFastx:

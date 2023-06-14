@@ -4,7 +4,7 @@
 # website: https://jannessp.github.io
 
 from src.filter_fastx import filterIDs, filterLength
-from src.slice_fastx import sliceFastx, getSlice
+from src.slice_fastx import sliceFastx, getSliceRegion
 from src.mergeIDs import intersect, union
 import os
 
@@ -59,10 +59,10 @@ def test_slice_fasta():
     assert seqs == ['AGGUAUC', 'UGAUUUA', 'GUGCCCC', 'ACGUCAC', 'CCCACCC']
 
 def test_getSlice_position_r():
-    assert (4, 15) == getSlice(position = 10, r = 5, lowerbound = None, upperbound = None)
+    assert (4, 15) == getSliceRegion(position = 10, range = 5, lowerbound = None, upperbound = None)
 
 def test_getSlice_lower_upper():
-    assert (4, 15) == getSlice(position = None, r = None, lowerbound = 5, upperbound = 15)
+    assert (4, 15) == getSliceRegion(position = None, range = None, lowerbound = 5, upperbound = 15)
 
 def test_filter_fastq_length_long():
     reads, longest, shortest = filterLength(testFastq, 'fastq', 70, 'long')
