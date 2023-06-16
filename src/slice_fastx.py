@@ -74,36 +74,35 @@ def getSliceRegion(position : int, range : int, lowerbound : int, upperbound : i
 
     return tuple(slice)
 
-def sliceFastx(inFastx : TextIOWrapper, outFastx : TextIOWrapper, slice : tuple, format : str, id : str = None) -> list:
+def sliceFastx(inFastx : str, outFastx : str, slice : tuple, id : str = None) -> list:
     '''
     Slice sequences and write new Fastx
 
     Parameters
     ----------
-    inFastx : TextIOWrapper
-        Fastx handle for incoming sequences
-    outFastx : TextIOWrapper
-        Fastx handle for outgoing sliced sequences
+    inFastx : str
+        Fastx file path for incoming sequences
+    outFastx : str
+        Fastx file path for outgoing sliced sequences
     slice : tuple
         Tuple containing the 0-based [included, excluded) slice interval
     id : str = None
         Only slice one specific sequence from incoming Fastx file
-    format : str = 'fasta'
-        format of read and written file, (fasta or fastq)
     '''
     slicedRecords = []
+    informat = FORMATS[os.path.splitext(inFastx)[1]].lower()
 
-    for record in SeqIO.parse(inFastx, format):
+    for record in SeqIO.parse(inFastx, informat):
         # with id filter
         if id and record.id == id:
-            sliceRecord(record, slice, format)
+            sliceRecord(record, slice, informat)
             slicedRecords.append(record)
 
         elif not id:
-            sliceRecord(record, slice, format)
+            sliceRecord(record, slice, informat)
             slicedRecords.append(record)
 
-    SeqIO.write(slicedRecords, outFastx, format)
+    SeqIO.write(slicedRecords, outFastx, FORMATS[os.path.splitext(outFastx)[1].lower()])
     return slicedRecords
 
 def sliceRecord(record : SeqIO.SeqRecord, slice : tuple, format : str) -> None:
@@ -150,10 +149,11 @@ def slice_end(num_of_bases : int) -> tuple:
 
 def main() -> None:
     args = parse()
-    format = FORMATS[os.path.splitext(args.inFastx)[1].lower()]
     id = args.id
     append = args.append
     assert append or not os.path.exists(args.outFastx), f'{args.outFastx} already exists! Use a different name or --append'
+    assert os.path.splitext(args.inFastx)[1].lower() in FORMATS, 'Unknown format of input file'
+    assert os.path.splitext(args.outFastx)[1].lower() in FORMATS, 'Unknown format of output file'
 
     if args.slice_start is not None:
         slice = slice_start(args.slice_start)
@@ -162,9 +162,7 @@ def main() -> None:
     else:
         slice = getSliceRegion(args.position, args.range, args.lowerbound, args.upperbound)
 
-    with open(args.inFastx, 'r') as inFastx:
-        with open(args.outFastx, 'a' if append else 'w') as outFastx:
-            sliceFastx(inFastx, outFastx, slice, format, id)
+    sliceFastx(args.inFastx, args.outFastx, slice, id)
 
 if __name__ == '__main__':
     main()
