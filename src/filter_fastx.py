@@ -65,7 +65,7 @@ def main() -> None:
     assert exists(inFX), f'{inFX} does not exist!'
 
     if ids is not None:
-        assert exists(ids), 'IDs file does not exist!'
+        assert exists(ids), f'{ids} file does not exist!'
         records, filtered, missed = filterIDs(inFX, informat, open(ids, 'r'))
         print('Found Reads: ', len(records), ', Filtered:, ', len(filtered), ', Unseen IDs: ', len(missed))
 
