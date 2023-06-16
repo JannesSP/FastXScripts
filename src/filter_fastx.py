@@ -61,8 +61,8 @@ def main() -> None:
         print('Must be .fa/.fasta or .fq/.fastq')
         exit(2)
 
-    assert not exists(outFX), 'outFASTX already exists!'
-    assert exists(inFX), 'inFASTX does not exist!'
+    assert not exists(outFX), f'{outFX} already exists!'
+    assert exists(inFX), f'{inFX} does not exist!'
 
     if ids is not None:
         assert exists(ids), 'IDs file does not exist!'
