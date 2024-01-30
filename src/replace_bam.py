@@ -22,6 +22,12 @@ def parse() -> Namespace:
     parser.add_argument("readreplaceCSV")
     return parser.parse_args()
 
+def revComp(seq : str) -> str:
+    complement_dict = {'A': 'U', 'U': 'A', 'C': 'G', 'G': 'C'}
+    rev_seq = seq[::-1]
+    rev_comp_seq = ''.join(complement_dict[base] for base in rev_seq)
+    return rev_comp_seq
+
 def main() -> None:
     args = parse()
     inbam = pysam.AlignmentFile(args.inbam, 'rb')
@@ -31,14 +37,36 @@ def main() -> None:
     for ridx, read in enumerate(inbam):
         if (ridx + 1) % 10 == 0:
             print(f'Read {ridx+1}', end='\r')
-        readreplacedBases = readreplaceDF[readreplaceDF['readid'] == read.query_name]        
+        
+        if read.is_supplementary:
+            # TODO how to handle these?
+            continue
+
+        readreplacedBases = readreplaceDF[readreplaceDF['readid'] == read.query_name]
         qualities = read.query_qualities
-        query_sequence = list(read.query_sequence)
+        query_sequence = list(str(read.get_forward_sequence()))
 
-        for _, replacedPos in readreplacedBases.iterrows():
-            query_sequence[replacedPos['position']] = replacedPos['sourcebase']
+        try:
+            for _, replacedPos in readreplacedBases.iterrows():
+                assert query_sequence[replacedPos['position']] == replacedPos['targetbase']
+                query_sequence[replacedPos['position']] = replacedPos['sourcebase']
+        except IndexError as e:
+            print("e", e)
+            print(read.query_name, len(query_sequence), read.query_alignment_start)
+            print(read.get_forward_sequence())
+            print(replacedPos['position'], query_sequence[replacedPos['position']], replacedPos['targetbase'])
+            exit(1)
+        except AssertionError as e:
+            print("e", e)
+            print(read.query_name, len(query_sequence), read.query_alignment_start)
+            print(read.get_forward_sequence())
+            print(replacedPos['position'], query_sequence[replacedPos['position']], replacedPos['targetbase'])
+            exit(1)
 
-        read.query_sequence = ''.join(query_sequence)
+        if read.is_reverse:
+            read.query_sequence = revComp(''.join(query_sequence))
+        else:
+            read.query_sequence = ''.join(query_sequence)
         read.query_qualities = qualities
         outbam.write(read)
 
