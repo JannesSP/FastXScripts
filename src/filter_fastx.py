@@ -25,6 +25,7 @@ def parse() -> Namespace:
     nt_mode = parser.add_mutually_exclusive_group()
     nt_mode.add_argument('--dna', action='store_true', default=False, help='Convert output sequences to dna (ACGT)')
     nt_mode.add_argument('--rna', action='store_true', default=False, help='Convert output sequences to rna (ACGU)')
+    parser.add_argument('-f', '--force', action='store_true', help='Force output overwrite')
 
     return parser.parse_args()
 
@@ -39,6 +40,7 @@ def main() -> None:
     number=args.number
     dna=args.dna
     rna=args.rna
+    force=args.force
 
     print('Filtering', inFX)
 
@@ -61,7 +63,8 @@ def main() -> None:
         print('Must be .fa/.fasta or .fq/.fastq')
         exit(2)
 
-    assert not exists(outFX), f'{outFX} already exists!'
+    if not force:
+        assert not exists(outFX), f'{outFX} already exists!'
     assert exists(inFX), f'{inFX} does not exist!'
 
     if ids is not None:
