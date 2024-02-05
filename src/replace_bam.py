@@ -51,16 +51,18 @@ def main() -> None:
                 assert query_sequence[replacedPos['position']] == replacedPos['targetbase']
                 query_sequence[replacedPos['position']] = replacedPos['sourcebase']
         except IndexError as e:
-            print("e", e)
+            print("IndexError:")
             print(read.query_name, len(query_sequence), read.query_alignment_start)
             print(read.get_forward_sequence())
             print(replacedPos['position'], query_sequence[replacedPos['position']], replacedPos['targetbase'])
+            print(e.with_traceback())
             exit(1)
         except AssertionError as e:
-            print("e", e)
+            print("AssertionError:")
             print(read.query_name, len(query_sequence), read.query_alignment_start)
             print(read.get_forward_sequence())
             print(replacedPos['position'], query_sequence[replacedPos['position']], replacedPos['targetbase'])
+            print(e.with_traceback())
             exit(1)
 
         if read.is_reverse:
