@@ -13,6 +13,8 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 import pandas as pd
 import pysam
 
+IDENT = {'A':'A', 'C':'C', 'G':'G', 'T':'T', 'U':'T'}
+
 def parse() -> Namespace:
     parser = ArgumentParser(
         formatter_class=ArgumentDefaultsHelpFormatter
@@ -23,7 +25,7 @@ def parse() -> Namespace:
     return parser.parse_args()
 
 def revComp(seq : str) -> str:
-    complement_dict = {'A': 'U', 'U': 'A', 'C': 'G', 'G': 'C'}
+    complement_dict = {'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C'}
     rev_seq = seq[::-1]
     rev_comp_seq = ''.join(complement_dict[base] for base in rev_seq)
     return rev_comp_seq
@@ -49,7 +51,7 @@ def main() -> None:
         try:
             for _, replacedPos in readreplacedBases.iterrows():
                 assert query_sequence[replacedPos['position']] == replacedPos['targetbase']
-                query_sequence[replacedPos['position']] = replacedPos['sourcebase']
+                query_sequence[replacedPos['position']] = IDENT[replacedPos['sourcebase']]
         except IndexError as e:
             print("IndexError:")
             print(read.query_name, len(query_sequence), read.query_alignment_start)
@@ -65,6 +67,7 @@ def main() -> None:
             print(e.with_traceback())
             exit(1)
 
+        # print(query_sequence)
         if read.is_reverse:
             read.query_sequence = revComp(''.join(query_sequence))
         else:
