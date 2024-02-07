@@ -26,6 +26,7 @@ def parse() -> Namespace:
     nt_mode.add_argument('--dna', action='store_true', default=False, help='Convert output sequences to dna (ACGT)')
     nt_mode.add_argument('--rna', action='store_true', default=False, help='Convert output sequences to rna (ACGU)')
     parser.add_argument('-f', '--force', action='store_true', help='Force output overwrite')
+    parser.add_argument('--inverse', action='store_true', help='Remove reads listed in --read_ids instead of filtering for them.')
 
     return parser.parse_args()
 
@@ -41,6 +42,7 @@ def main() -> None:
     dna=args.dna
     rna=args.rna
     force=args.force
+    inverse=args.inverse
 
     print('Filtering', inFX)
 
@@ -69,7 +71,7 @@ def main() -> None:
 
     if ids is not None:
         assert exists(ids), f'{ids} file does not exist!'
-        records, filtered, missed = filterIDs(inFX, informat, open(ids, 'r'))
+        records, filtered, missed = filterIDs(inFX, informat, open(ids, 'r'), inverse)
         print('Found Reads: ', len(records), ', Filtered:, ', len(filtered), ', Unseen IDs: ', len(missed))
 
     elif long is not None:
@@ -160,7 +162,7 @@ def filterLength(inFX : str, format : str, threshold : int, mode : str) -> tuple
     print()
     return out, longest, shortest
 
-def filterIDs(inFX : str, format : str, ids : TextIOWrapper) -> tuple:
+def filterIDs(inFX : str, format : str, ids : TextIOWrapper, inverse : bool) -> tuple:
     '''
     Filters the input FASTX for ids in given list and writes filtered FASTX.
     
@@ -198,11 +200,21 @@ def filterIDs(inFX : str, format : str, ids : TextIOWrapper) -> tuple:
         if (idx+1)%1000==0:
             print(f'Processing line {idx+1} ...', end='\r')
 
-        if seq_record.name in ids_list:
-            foundRecords.append(seq_record)
-            ids_list.remove(seq_record.name)
+        if not inverse:
+
+            if seq_record.name in ids_list:
+                foundRecords.append(seq_record)
+                ids_list.remove(seq_record.name)
+            else:
+                removedIDs.append(seq_record.name)
+
         else:
-            removedIDs.append(seq_record.name)
+
+            if seq_record.name not in ids_list:
+                foundRecords.append(seq_record)
+                ids_list.remove(seq_record.name)
+            else:
+                removedIDs.append(seq_record.name)
 
     print(f'Processed lines {idx}\t\t')
 
