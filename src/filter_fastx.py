@@ -212,9 +212,9 @@ def filterIDs(inFX : str, format : str, ids : TextIOWrapper, inverse : bool) -> 
 
             if seq_record.name not in ids_list:
                 foundRecords.append(seq_record)
-                ids_list.remove(seq_record.name)
             else:
                 removedIDs.append(seq_record.name)
+                ids_list.remove(seq_record.name)
 
     print(f'Processed lines {idx}\t\t')
 
